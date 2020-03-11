@@ -1,0 +1,101 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <chrono>
+#include <unistd.h>
+#include <Stk.h>
+#include <RtMidi.h>
+#include "const.h"
+#include "utils.h"
+#include "Parameters.h"
+#include "TimedMidiMes.h"
+#include "TimedMidiQueue.h"
+#include "Singer.h"
+#include "Choir.h"
+
+int main(int argc, char** argv) {
+  RtMidiIn* midiin = 0;
+  RtMidiOut* midiout = 0;
+
+  try {
+    midiin = new RtMidiIn(RtMidi::UNSPECIFIED, "midicanon in");
+  } catch (RtMidiError &error) {
+    error.printMessage();
+    exit( EXIT_FAILURE );
+  }
+
+  try {
+    midiout = new RtMidiOut(RtMidi::UNSPECIFIED, "midicanon out");
+  } catch (RtMidiError &error) {
+    error.printMessage();
+    exit( EXIT_FAILURE );
+  }
+
+  midiin->openVirtualPort();
+  midiin->ignoreTypes(true, true, true);
+  midiout->openVirtualPort();
+
+  Choir* choir;
+  choir = new Choir();
+  choir->read_file("parameters.txt");
+
+  int running = 1;
+  double stamp;
+  std::vector<unsigned char> message;
+  int nBytes;
+  while (running) {
+    usleep(1000);
+    message.clear();
+    stamp = midiin->getMessage(&message);
+    nBytes = message.size();
+    if (nBytes > 0) {
+       if (stamp == 0) {
+       std::cout << " ==================================================\n";
+       }
+      std::cout << "bytes: [ ";
+      for (int i=0; i < nBytes; i++) {
+        std::cout << (int)message[i] << " ";
+      }
+      std::cout << "]\n";
+   }
+    if (message.size() == 3) {
+      nBytes = message.size();
+      int first_byte;
+      first_byte = message[0];
+      if ((first_byte < 128) || ((first_byte > 159) && (first_byte < 176)) || (first_byte > 191)) {
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+      }
+      else {
+      if ((first_byte >= 144) && (first_byte <= 159)){
+        std::cout << " -------------------------------------\n";
+      }
+      if (message[2] == 0) {
+        std::cout << "note off\n";
+        message[0] = 128;
+      }
+//      std::cout << "stamp: " << stamp << "!" << '\n';
+      if (nBytes != 3) {
+        std::cout << "Warning: Recieved a midi signal \n";
+        std::cout << "         with not exactly 3 bytes!\n";
+      }
+      if ((message[1] == cNoteForExit) && (message[2] > 0)) {
+        running = 0;
+      }
+      else {
+        std::cout << "hallo \n";
+        choir->push(message);
+        message = choir->pull();
+        midiout->sendMessage(&message);
+        usleep(10000);
+      }
+      }
+   }
+ }
+
+  midiout->closePort();
+  midiin->closePort();
+
+  delete midiout;
+  delete midiin;
+  delete choir;
+}
