@@ -12,6 +12,13 @@ const char cCommentTag = '%';
 
 const float cFloatDelta = 0.0000000001; // For testing equality of floats.
 
+enum StatusByteType {
+  unknown,
+  note_on, note_off,
+  pedal_pressed, pedal_released
+};
+
+
 const std::vector < std::string > cNotenames = {
     "c-1", "c#-1", "d-1", "d#-1", "e-1", "f-1", "f#-1", "g-1", "g#-1", "a-1", "a#-1", "b-1",
     "c0", "c#0", "d0", "d#0", "e0", "f0", "f#0", "g0", "g#0", "a0", "a#0", "b0",

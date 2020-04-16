@@ -29,6 +29,12 @@ namespace utils {
   
   std::string midicode_to_notename(unsigned char midicode);
 
+  StatusByteType status_byte_type(
+   std::vector< unsigned char > message);
+
+  unsigned int channel(std::vector< unsigned char > message);
+
+
 }
 
 #endif

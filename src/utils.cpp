@@ -94,3 +94,54 @@ std::string utils::midicode_to_notename(
  unsigned char midicode) {
  return cNotenames[midicode];
 }
+
+StatusByteType utils::status_byte_type(
+ std::vector< unsigned char > message) {
+  if (message.size() == 3) {
+    unsigned char byte = message[0];
+    if ((144 <= byte) && (byte < 160)) {
+      return note_on;
+    }
+    else if ((128 <= byte) && (byte < 144)) {
+      return note_off;
+    }
+    else if ((176 <= byte) && (byte < 192)) {
+      if (message[1] == 64) {
+        if (message[2] > 64) {
+          return pedal_pressed;
+        }
+        else {
+          return pedal_released;
+        }
+      }
+      else {
+        return unknown;
+      }
+    }
+    else {
+      return unknown;
+    }
+  }
+  else {
+    return unknown;
+  }
+}
+
+unsigned int utils::channel(std::vector< unsigned char > message) {
+  StatusByteType type = status_byte_type(message);
+  if (type == note_on) {
+    return message[0] - 144;
+  }
+  else if (type == note_off) {
+    return message[0] - 128;
+  }
+  else if (type == pedal_pressed) {
+    return message[0] - 176;
+  }
+  else if (type == pedal_released) {
+    return message[0] - 176;
+  }
+  else {
+    return 0;
+  }
+}

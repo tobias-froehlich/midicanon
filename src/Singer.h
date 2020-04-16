@@ -5,6 +5,7 @@ class Singer {
   private:
     std::vector < unsigned char > zMidiCodes{};
     int zDelay = 0;
+    int zChannel = 0;
   public:
     Singer();
     ~Singer();
@@ -15,6 +16,8 @@ class Singer {
      unsigned char index);
     void set_delay(int delay);
     int get_delay();
+    void set_channel(int channel);
+    int get_channel();
     TimedMidiMes make_timedmidimes(
      std::vector < unsigned char > message);
 };

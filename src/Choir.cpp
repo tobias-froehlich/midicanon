@@ -34,7 +34,11 @@ void Choir::read_file(std::string filename) {
     parameters->get_values("cf_notes"),
     parameters->get_values("cf_notes")
   );
+  if (parameters->name_occurs("cf_channel")) {
+    zSingers.back().set_channel(std::stoi(parameters->get_values("cf_channel").front()) - 1);
+  }
   zSingers.back().set_delay(0);
+  std::cout << "Cantus Firmus at channel " << zSingers.back().get_channel() + 1 << "\n";
 
   std::string parametername("");
   int found = 1;
@@ -42,6 +46,7 @@ void Choir::read_file(std::string filename) {
   std::string str_cp("cp");
   std::string str_notes("_notes");
   std::string str_delay("_delay");
+  std::string str_channel("_channel");
 
   while (found) {
     cp_number += 1;
@@ -59,7 +64,14 @@ void Choir::read_file(std::string filename) {
       zSingers.back().set_delay(
         std::stof(parameters->get_values(parametername).front())/(float)tempo*60.0*1000000
       );
-      std::cout << "Singer with delay " << zSingers.back().get_delay() << ".\n";
+      parametername = 
+       str_cp +
+       std::to_string(cp_number) +
+       str_channel;
+      if (parameters->name_occurs(parametername)) {
+        zSingers.back().set_channel(std::stoi(parameters->get_values(parametername).front()) - 1);
+      }
+      std::cout << "Singer with delay " << zSingers.back().get_delay() << " on channel " << zSingers.back().get_channel() + 1 << ".\n";
     }
     else {
       found = 0;

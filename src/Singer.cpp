@@ -71,9 +71,18 @@ int Singer::get_delay() {
   return zDelay;
 }
 
+void Singer::set_channel(int channel) {
+  zChannel = channel;
+}
+
+int Singer::get_channel() {
+  return zChannel;
+}
+
 TimedMidiMes Singer::make_timedmidimes(
  std::vector < unsigned char > message) {
   std::cout << message.size() << "\n";
+  message[0] = message[0] + zChannel - utils::channel(message);
   message[1] = get_midicode(message[1]);
   std::cout << "* " << (int)message[0] << ", " << (int)message[1] << ", " << (int)message[2] << "*\n";
   return TimedMidiMes(message, zDelay);
